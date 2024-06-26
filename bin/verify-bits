@@ -1,0 +1,29 @@
+#!/usr/bin/perl -w
+
+use strict;
+
+my $expected_high = "d7";
+my $expected_low = "62";
+
+print "Verifying ...\n";
+my $verify = `avrdude -c usbtiny -p attiny84 -P usb 2>&1`;
+
+# lfuse:w:0x62:m -U hfuse:w:0xd7:m
+my ($e, $high, $low) = $verify =~ /\(E:([0-9A-F]{2}), H:([0-9A-F]{2}), L:([0-9A-F]{2})\)/;
+
+$e = lc($e);
+$high = lc($high);
+$low = lc($low);
+
+if ($high ne $expected_high) {
+    print "\thigh bytes incorrect: $high != $expected_high\n";
+} else {
+    print "\thigh bytes correct\n";
+}
+if ($low ne $expected_low) {
+    print "\tlow bytes incorrec: $low != $expected_low\n";
+} else {
+    print "\tlow bytes correct\n";
+}
+
+print "\tE:$e H:$high L:$low\n";

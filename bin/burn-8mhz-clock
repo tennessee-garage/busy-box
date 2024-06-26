@@ -1,0 +1,4 @@
+#!/bin/bash
+
+avrdude -c usbtiny -p attiny84 -P usb -U lfuse:w:0xc2:m -U hfuse:w:0xdf:m
+

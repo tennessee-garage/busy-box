@@ -1,0 +1,15 @@
+# eagle ignores
+*.lck
+*.b#*
+*.s#*
+
+# Ignore build artifacts from the avr toolchain
+*.eep
+*.elf
+*.hex
+*.lss
+*.lst
+*.map
+*.sym
+cmake-build-debug
+
