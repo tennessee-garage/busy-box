@@ -18,7 +18,8 @@ private:
     uint8_t _prev_next_code = 0;
     uint16_t _store = 0;
 
-    uint16_t _current_value, _max_value;
+    int16_t _current_value;
+    uint16_t _max_value;
 
     // Keep track of what state we've read from the button
     bool _button_down = false;
@@ -28,7 +29,7 @@ private:
 
     unsigned long _last_button_change = 0;
 
-    uint8_t _read_rotary();
+    int8_t _read_rotary();
     bool _button_reports_pressed();
 };
 

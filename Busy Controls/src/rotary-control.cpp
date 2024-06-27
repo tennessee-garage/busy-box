@@ -139,7 +139,6 @@ unsigned long last_button_change = 0;
 bool button_down = false;
 
 void setup() {
-    //pinMode(NEO_PIN, OUTPUT);
     FastLED.addLeds<LED_TYPE, NEO_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection( TypicalSMD5050 );
     FastLED.setBrightness(BRIGHTNESS);
 

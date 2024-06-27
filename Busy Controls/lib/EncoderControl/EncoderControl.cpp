@@ -7,12 +7,9 @@ EncoderControl::EncoderControl(uint8_t data_pin, uint8_t clock_pin, uint8_t butt
     _current_value = 0;
     _max_value = max_value;
 
-    pinMode(_data_pin, INPUT);
-    pinMode(_clock_pin, INPUT);
-    pinMode(_button_pin, INPUT);
-
-    // Set the pullup resistor on the button pin
-    digitalWrite(_button_pin, HIGH);
+    pinMode(_data_pin, INPUT_PULLUP);
+    pinMode(_clock_pin, INPUT_PULLUP);
+    pinMode(_button_pin, INPUT_PULLUP);
 }
 
 void EncoderControl::poll() {
@@ -28,10 +25,14 @@ void EncoderControl::poll() {
         _button_down = false;
         _last_button_change = millis();
     }
-    
-    _current_value = (_current_value + _read_rotary()) % (_max_value + 1);
+
+    _current_value += _read_rotary();
+
+    // Hold the resulting value at our defined bounds
     if (_current_value < 0) {
         _current_value = 0;
+    } else if (_current_value > _max_value) {
+        _current_value = _max_value;
     }
 }
 
@@ -51,7 +52,8 @@ bool EncoderControl::_button_reports_pressed() {
     return digitalRead(_button_pin) == 0;
 }
 
-uint8_t EncoderControl::_read_rotary() {
+// source: https://www.best-microcontroller-projects.com/rotary-encoder.html
+int8_t EncoderControl::_read_rotary() {
     static int8_t rot_enc_table[] = {0,1,1,0,1,0,0,1,1,0,0,1,0,1,1,0};
 
     _prev_next_code <<= 2;
@@ -63,7 +65,9 @@ uint8_t EncoderControl::_read_rotary() {
     if (rot_enc_table[_prev_next_code] ) {
         _store <<= 4;
         _store |= _prev_next_code;
-        if ((_store & 0xff) == 0x2b) return -1;
+        // Altered from source, 0x2b seemed incorrect based on the writeup
+        //if ((_store & 0xff) == 0x2b) return -1;
+        if ((_store & 0xff) == 0xbd) return -1;
         if ((_store & 0xff) == 0x17) return 1;
     }
 
