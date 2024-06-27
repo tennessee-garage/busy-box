@@ -1,7 +1,7 @@
 #ifndef BUSY_CONTROLS_ENCODERCONTROL_H
 #define BUSY_CONTROLS_ENCODERCONTROL_H
 
-#include "Arduino.h"
+#include <Arduino.h>
 
 #define BUTTON_DEBOUNCE_MS 5
 
