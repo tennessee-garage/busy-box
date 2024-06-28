@@ -7,6 +7,15 @@
 #define IN_OVERFLOW() (USISR & _BV(USIOIF))
 #define NOT_IN_OVERFLOW() !IN_OVERFLOW()
 
+// USIWM0 sets 3 wire mode, USICS1 sets an external clock source
+#define SPI_ON_SETTINGS _BV(USIWM0) | _BV(USICS1)
+#define SPI_OFF_SETTINGS 0
+
+// Use these to enable and disable SPI.  Since there's no native slave select handling, we want to make sure
+// our device doesn't send the data sitting in USIDR down the line when its some other devices turn to communicate
+#define SPI_ON() USICR = SPI_ON_SETTINGS
+#define SPI_OFF() USICR = SPI_OFF_SETTINGS
+
 TinySPI* TinySPI::instance;
 
 TinySPI::TinySPI(uint8_t do_pin, uint8_t di_pin, uint8_t clk_pin, uint8_t en_pin) {
@@ -17,14 +26,8 @@ TinySPI::TinySPI(uint8_t do_pin, uint8_t di_pin, uint8_t clk_pin, uint8_t en_pin
 
     pinMode(_do_pin, OUTPUT);
     pinMode(_di_pin, INPUT);
-    pinMode(enable_pin, INPUT);
+    pinMode(enable_pin, INPUT_PULLUP);
     pinMode(_clk_pin, INPUT);
-
-    // Configure the enable pin to have a pullup resistor by writing high to it
-    digitalWrite(enable_pin, HIGH);
-
-    // USIWM0 sets 3 wire mode, USICS1 sets an external clock source
-    USICR = _BV(USIWM0) | _BV(USICS1);
 }
 
 void TinySPI::begin() {
@@ -73,6 +76,8 @@ ISR(PCINT0_vect) {
     }
 
     if (digitalRead(TinySPI::instance->enable_pin) == 0) {
+        SPI_ON();
+
         // Clear overflow when we see the falling edge of the enable pin
         CLEAR_OVERFLOW();
     }
@@ -93,6 +98,8 @@ bool TinySPI::poll_byte() {
     // Read the value we got in and immediately write out the value we want to send forward
     _last_byte = USIDR;
     USIDR = _last_byte + 1;
+
+    SPI_OFF();
 
     return true;
 }
