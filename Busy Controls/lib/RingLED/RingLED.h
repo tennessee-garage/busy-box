@@ -1,11 +1,16 @@
 #ifndef BUSY_CONTROLS_RINGLED_H
 #define BUSY_CONTROLS_RINGLED_H
 
+// This library controls a neopixel ring: https://www.adafruit.com/product/1643
+// It is able to take a variable number of pixels, so that it should be able to work with 
+// the 12 or 16 light ring.  For variouis reasons (see next comment below) the pin can't be passed in.
+
 #include <Arduino.h>
 #include <FastLED.h>
 
 // For bizzare reasons (https://github.com/FastLED/FastLED/issues/1137) the pin must be constant.  On an ATTiny84
-// PIN_PB0 maps to 10.  Likely for similar reasons (which I can't find) you can't pass in PIN_PB0, and anyway, its
+// PIN_PB0 experimentally maps to a value of 10.  Likely for similar reasons as the above github issue 
+// (though I can't find a definitive answer) you can't pass in the pin constant (PIN_PB0), and anyway, its
 // value does not resolve to 10.  No idea how this  mapping works.
 #define DATA_PIN 10
 

@@ -1,6 +1,11 @@
 #ifndef BUSY_CONTROLS_VUDISPLAY_H
 #define BUSY_CONTROLS_VUDISPLAY_H
 
+// Controls a VU meter such as: https://www.aliexpress.us/item/2251832764045918.html
+// The device itself is really only a voltage meter (i.e. it does not have control circuitry
+// to set it arbitrarily), so this library is controlling this board (https://oshpark.com/projects/YezPrUKP/view_design)
+// which sends out the appropriate voltage to attain the desired reading on the VU.
+
 #include "Arduino.h"
 
 class VUDisplay {

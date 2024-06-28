@@ -1,6 +1,9 @@
 #ifndef BUSY_CONTROLS_TINYSPI_H
 #define BUSY_CONTROLS_TINYSPI_H
 
+// A library to implement some simple slave SPI communications on an ATTinyX4, since
+// this devices does not have dedicated SPI hardware, and is not slave-select aware.
+
 #include "Arduino.h"
 
 class TinySPI {

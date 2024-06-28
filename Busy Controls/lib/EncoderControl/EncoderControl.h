@@ -1,6 +1,12 @@
 #ifndef BUSY_CONTROLS_ENCODERCONTROL_H
 #define BUSY_CONTROLS_ENCODERCONTROL_H
 
+// This library interfaces with a HW-040 rotary encoder: https://www.aliexpress.us/item/3256806292109542.html
+// It stores the current value of the encoder (which is assumed to be zero at startup) and whether the button
+// has been pressed.  Button presses must be polled via 'was_button_pressed', and once the caller has read
+// this button press, it is responsible for clearing the flag via 'clear_button_press'.  Ther is no flag for
+// whether the value has changed, its simply available via 'current_value'.
+
 #include <Arduino.h>
 
 #define BUTTON_DEBOUNCE_MS 5
