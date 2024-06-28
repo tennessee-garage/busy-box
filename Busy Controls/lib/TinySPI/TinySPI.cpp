@@ -22,11 +22,13 @@ TinySPI::TinySPI(uint8_t do_pin, uint8_t di_pin, uint8_t clk_pin, uint8_t en_pin
     _do_pin = do_pin;
     _di_pin = di_pin;
     _clk_pin = clk_pin;
-    enable_pin = en_pin;
+    _enable_pin = en_pin;
 
-    pinMode(_do_pin, OUTPUT);
+    // Set the data out pin to INPUT to keep it floating until we're actually selected.
+    pinMode(_do_pin, INPUT);
+
     pinMode(_di_pin, INPUT);
-    pinMode(enable_pin, INPUT_PULLUP);
+    pinMode(_enable_pin, INPUT_PULLUP);
     pinMode(_clk_pin, INPUT);
 }
 
@@ -35,7 +37,7 @@ void TinySPI::begin() {
     GIMSK |= (1 << PCIE0);
 
     // Enable appropriate interrupt for the given select pin 
-    switch (enable_pin) {
+    switch (_enable_pin) {
         case PIN_A0:
             PCMSK0 |= (1 << PCINT0);
             break;
@@ -75,20 +77,33 @@ ISR(PCINT0_vect) {
         return;
     }
 
-    if (digitalRead(TinySPI::instance->enable_pin) == 0) {
+    if (TinySPI::instance->is_chip_selected()) {
+        TinySPI::instance->enable_spi();
+    }
+}
+
+bool TinySPI::is_chip_selected() {
+    return digitalRead(_enable_pin) == 0;
+}
+
+void TinySPI::enable_spi() {
+        pinMode(_do_pin, OUTPUT);
         SPI_ON();
 
         // Clear overflow when we see the falling edge of the enable pin
         CLEAR_OVERFLOW();
-    }
+
+        // Load whatever our current response byte is
+        USIDR = _response_byte;
 }
 
-bool TinySPI::_is_chip_selected() {
-    return digitalRead(enable_pin) == 0;
+void TinySPI::disable_spi() {
+    pinMode(_do_pin, INPUT);
+    SPI_OFF();
 }
 
 bool TinySPI::poll_byte() {
-    if (!_is_chip_selected()) {
+    if (!is_chip_selected()) {
         return false;
     }
 
@@ -97,11 +112,17 @@ bool TinySPI::poll_byte() {
 
     // Read the value we got in and immediately write out the value we want to send forward
     _last_byte = USIDR;
-    USIDR = _last_byte + 1;
 
-    SPI_OFF();
+    disable_spi();
 
     return true;
+}
+
+// This value gets shifted off as the response while data from the master is comming in,
+// so we have to set it ahead of time.  This cannot be used for values that respond to
+// data the master sends 
+void TinySPI::set_response_byte(uint8_t response) {
+    _response_byte = response;
 }
 
 uint8_t TinySPI::last_byte() {
