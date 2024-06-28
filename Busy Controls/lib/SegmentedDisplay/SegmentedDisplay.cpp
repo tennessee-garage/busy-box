@@ -96,3 +96,20 @@ void SegmentedDisplay::blank() {
     }
     _pulse_register_clock();
 }
+
+void SegmentedDisplay::test_pattern() {
+    blank();
+
+    // Run through the test sequence 4 times
+    for (int num=0; num < 4; num++) {
+        // Go through each step of the sequence in order
+        for (int seq=0; seq < 8; seq++) {
+            // Load the same sequence of the test pattern on all displays
+            for (int display=0; display < _num_displays; display++) {
+                _load_register(_test_segments[seq]);
+            }
+            _pulse_register_clock();
+            delay(100);
+        }
+    }
+}

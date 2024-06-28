@@ -28,6 +28,7 @@ void setup() {
                                 OUTPUT_ENABLE_PIN, 
                                 NUM_DISPLAYS);
 
+    DISP->test_pattern();
     DISP->blank();
 
     spi = new TinySPI(DO_PIN, DI_PIN, SCLK_PIN, SS_PIN);
