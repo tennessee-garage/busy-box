@@ -10,6 +10,7 @@ VUDisplay::VUDisplay(uint8_t pin, uint8_t max) {
 }
 
 void VUDisplay::write(uint8_t val) {
+    _value = val;
     // The gauge is inverted; writing zero shows it the full 12V source, writing 255
     // grounds it through the MOSFET, showing zero on the gauge.
     analogWrite(_vu_pin, int((_max-val) * _scale_factor));
@@ -17,4 +18,11 @@ void VUDisplay::write(uint8_t val) {
 
 uint8_t VUDisplay::value() {
     return _value;
+}
+
+void VUDisplay::ease_to_zero() {
+    for (uint8_t i=_value; i > 0; i--) {
+        write(i);
+        delay(EASE_STEP_MS);
+    }
 }

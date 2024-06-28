@@ -8,11 +8,15 @@
 
 #include "Arduino.h"
 
+// When easing the needle down to zero, spend this many ms at each step
+#define EASE_STEP_MS 6
+
 class VUDisplay {
 public:
     VUDisplay(uint8_t pin, uint8_t max);
     void write(uint8_t val);
     uint8_t value();
+    void ease_to_zero();
 
 private:
     uint8_t _vu_pin;
