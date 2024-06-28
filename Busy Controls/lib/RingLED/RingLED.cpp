@@ -10,6 +10,7 @@ RingLED::RingLED(uint16_t num_leds, uint8_t brightness) {
     FastLED.addLeds<NEOPIXEL, DATA_PIN>(_leds, num_leds);
     FastLED.setBrightness(brightness);
     clear();
+    set_display_method(RedDotUpdate);
 }
 
 void RingLED::clear() {
