@@ -12,7 +12,7 @@ EncoderControl::EncoderControl(uint8_t data_pin, uint8_t clock_pin, uint8_t butt
     pinMode(_button_pin, INPUT_PULLUP);
 }
 
-void EncoderControl::poll() {
+bool EncoderControl::poll() {
     if (!_button_down &&
         _button_reports_pressed() &&
         ((millis() - _last_button_change) > BUTTON_DEBOUNCE_MS)) {
@@ -26,7 +26,8 @@ void EncoderControl::poll() {
         _last_button_change = millis();
     }
 
-    _current_value += _read_rotary();
+    int8_t rotary_incr = _read_rotary();
+    _current_value += rotary_incr;
 
     // Hold the resulting value at our defined bounds
     if (_current_value < 0) {
@@ -34,6 +35,8 @@ void EncoderControl::poll() {
     } else if (_current_value > _max_value) {
         _current_value = _max_value;
     }
+
+    return rotary_incr != 0;
 }
 
 uint16_t EncoderControl::current_value() {

@@ -14,7 +14,7 @@
 class EncoderControl {
 public:
     EncoderControl(uint8_t data_pin, uint8_t clock_pin, uint8_t button_pin, uint16_t max_value);
-    void poll();
+    bool poll();
     uint16_t current_value();
     bool was_button_pressed();
     void clear_button_press();
