@@ -10,7 +10,7 @@
 #define SCLK_PIN PIN_A4
 #define SS_PIN PIN_A7
 
-TinySPI *spi;
+TinySPI *SPI;
 VUDisplay *vu;
 
 enum commands {
@@ -18,14 +18,14 @@ enum commands {
 };
 
 void setup() {
-    spi = new TinySPI(DO_PIN, DI_PIN, SCLK_PIN, SS_PIN);
+    SPI = new TinySPI(DO_PIN, DI_PIN, SCLK_PIN, SS_PIN);
     vu = new VUDisplay(VU_PIN, 100);
 
-    spi->begin();
+    SPI->begin();
 }
 
 void loop() {
-    if (spi->poll_byte()) {
-        vu->write(spi->last_byte());
+    if (SPI->poll_byte()) {
+        vu->write(SPI->last_byte());
     }
 }
