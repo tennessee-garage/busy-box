@@ -17,7 +17,7 @@
 #define SCLK_PIN PIN_A4
 #define SS_PIN PIN_A7
 
-TinySPI *spi;
+TinySPI *SPI;
 SegmentedDisplay *DISP;
 
 void setup() {
@@ -31,12 +31,11 @@ void setup() {
     DISP->test_pattern();
     DISP->blank();
 
-    spi = new TinySPI(DO_PIN, DI_PIN, SCLK_PIN, SS_PIN);
-    spi->begin();
+    SPI = new TinySPI(DO_PIN, DI_PIN, SCLK_PIN, SS_PIN);
 }
 
 void loop() {
-    if (spi->poll_byte()) {
-        DISP->write(spi->last_byte());
+    if (SPI->poll_byte()) {
+        DISP->write(SPI->last_byte());
     }
 }

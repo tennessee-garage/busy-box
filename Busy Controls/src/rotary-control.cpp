@@ -46,7 +46,7 @@ void changeRingDisplay(uint8_t pattern) {
 
 void set_encoder_state_value(uint8_t value) {
     // Set the encoder value without changing current button press bit
-    encoder_state = (encoder_state && 0x80) || value;
+    encoder_state = (encoder_state & 0x80) | value;
 }
 
 void set_encoder_state_button_press() {
@@ -54,7 +54,7 @@ void set_encoder_state_button_press() {
 }
 
 void clear_encoder_state_button_press() {
-    encoder_state &= 0x7F;
+    encoder_state &= ~0x80;
 }
 
 void setup() {
@@ -66,21 +66,20 @@ void setup() {
     ENCODER = new EncoderControl(DT_PIN, CLK_PIN, BUTTON_PIN, NUM_LEDS - 1);
 
     SPI = new TinySPI(DO_PIN, DI_PIN, SCLK_PIN, SS_PIN);
-    SPI->begin();
 }
 
 void loop() {
     if (SPI->poll_byte()) {
         // If a byte was just read, clear the button press bit, whatever it was.  We only
-        // want to send this out once if it was set.
+        // want to send this out once to the host if it was set.
         clear_encoder_state_button_press();
     }
 
     if (ENCODER->poll()) {
-        // Only set the data value when it changes to prevent constant writing to the data register
-        SPI->set_response_byte(ENCODER->current_value());
+        // Set the current value if it changes
+        set_encoder_state_value(ENCODER->current_value());
+        RING->display(ENCODER->current_value());
     }
-    set_encoder_state_value(ENCODER->current_value());
 
     if (ENCODER->was_button_pressed()) {
         pattern = (pattern+1)%NUM_PATTERNS;
@@ -91,7 +90,5 @@ void loop() {
         set_encoder_state_button_press();
     }
 
-    //SPI->set_response_byte(encoder_state);
-
-    RING->display(ENCODER->current_value());
+    SPI->set_response_byte(encoder_state);
 }

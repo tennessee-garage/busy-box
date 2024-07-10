@@ -11,13 +11,18 @@
 #define GREEN_LED_PIN PIN_A2
 #define BLUE_LED_PIN PIN_A1
 
+// LED bit positions for command to turn LEDs on/off
+#define RED_CMD_BIT 0x1
+#define GREEN_CMD_BIT 0x2
+#define BLUE_CMD_BIT 0x4
+
 // SPI Pins
 #define DO_PIN PIN_A5
 #define DI_PIN PIN_A6
 #define SCLK_PIN PIN_A4
 #define SS_PIN PIN_A7
 
-TinySPI *spi;
+TinySPI *SPI;
 VUDisplay *vu;
 
 void red_led_on() {
@@ -58,6 +63,26 @@ void init_leds() {
     all_leds_off();
 }
 
+void write_leds(uint8_t val) {
+    if (val & RED_CMD_BIT) {
+        red_led_on();
+    } else {
+        red_led_off();
+    }
+
+    if (val & GREEN_CMD_BIT) {
+        green_led_on();
+    } else {
+        green_led_off();
+    }
+
+    if (val & BLUE_CMD_BIT) {
+        blue_led_on();
+    } else {
+        blue_led_off();
+    }
+}
+
 void test_pattern() {
     for (uint8_t i=0; i < 100; i++) {
         vu->write(i);
@@ -75,8 +100,16 @@ void test_pattern() {
     }
 }
 
+bool is_vu_set(uint8_t val) {
+    return (val & 0x80) == 0;
+}
+
+bool is_led_set(uint8_t val) {
+    return (val & 0x80) == 0x80;
+}
+
 void setup() {
-    spi = new TinySPI(DO_PIN, DI_PIN, SCLK_PIN, SS_PIN);
+    SPI = new TinySPI(DO_PIN, DI_PIN, SCLK_PIN, SS_PIN);
     vu = new VUDisplay(VU_PIN, 100);
     init_leds();
 
@@ -85,11 +118,20 @@ void setup() {
     all_leds_off();
     vu->ease_to_zero();
 
-    spi->begin();
+    pinMode(PIN_PA0, OUTPUT);
+    digitalWrite(PIN_PA0, LOW);
 }
 
 void loop() {
-    if (spi->poll_byte()) {
-        vu->write(spi->last_byte());
+    if (SPI->poll_byte()) {
+        uint8_t byte = SPI->last_byte();
+
+        if (is_vu_set(byte)) {
+            vu->write(byte);
+        } else if (is_led_set(byte)) {
+    digitalWrite(PIN_PA0, HIGH);
+    digitalWrite(PIN_PA0, LOW);
+            write_leds(byte);
+        }
     }
 }
