@@ -19,6 +19,9 @@
 #define SCLK_PIN PIN_A4
 #define SS_PIN PIN_A7
 
+// We want a range from 0 to 99
+#define MAX_VALUE 99
+
 EncoderControl *ENCODER;
 RingLED *RING;
 TinySPI *SPI;
@@ -29,6 +32,10 @@ static uint8_t encoder_state;
 
 // Keep track of the ring display method used
 static uint8_t pattern = 0;
+
+enum Commands {
+    RESET_COUNT = 0x81,
+};
 
 void changeRingDisplay(uint8_t pattern) {
     switch(pattern) {
@@ -57,13 +64,23 @@ void clear_encoder_state_button_press() {
     encoder_state &= ~0x80;
 }
 
+void handle_host_command() {
+    switch (SPI->last_byte()) {
+        case RESET_COUNT:
+            ENCODER->clear_value();
+            break;
+        default:
+            break;
+    }
+}
+
 void setup() {
     RING = new RingLED(NUM_LEDS);
     RING->test_pattern();
     RING->clear();
     RING->display(0);
 
-    ENCODER = new EncoderControl(DT_PIN, CLK_PIN, BUTTON_PIN, NUM_LEDS - 1);
+    ENCODER = new EncoderControl(DT_PIN, CLK_PIN, BUTTON_PIN, MAX_VALUE);
 
     SPI = new TinySPI(DO_PIN, DI_PIN, SCLK_PIN, SS_PIN);
 }
@@ -73,6 +90,7 @@ void loop() {
         // If a byte was just read, clear the button press bit, whatever it was.  We only
         // want to send this out once to the host if it was set.
         clear_encoder_state_button_press();
+        handle_host_command();
     }
 
     if (ENCODER->poll()) {

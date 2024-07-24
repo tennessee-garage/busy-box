@@ -36,11 +36,31 @@ bool EncoderControl::poll() {
         _current_value = _max_value;
     }
 
-    return rotary_incr != 0;
+    bool has_new_value = false;
+    // If we detect a rotation, then we have a new value
+    if (rotary_incr != 0)  {
+        has_new_value = true;
+    }
+    // If the value was changed externally (via set_value) then we have a new value
+    if (_value_changed_externally) {
+        _value_changed_externally = false;
+        has_new_value = true;
+    }
+
+    return has_new_value;
 }
 
 uint16_t EncoderControl::current_value() {
     return _current_value;
+}
+
+void EncoderControl::clear_value() {
+    set_value(0);
+}
+
+void EncoderControl::set_value(uint8_t value) {
+    _value_changed_externally = true;
+    _current_value = value;
 }
 
 bool EncoderControl::was_button_pressed() {

@@ -16,6 +16,8 @@ public:
     EncoderControl(uint8_t data_pin, uint8_t clock_pin, uint8_t button_pin, uint16_t max_value);
     bool poll();
     uint16_t current_value();
+    void clear_value();
+    void set_value(uint8_t);
     bool was_button_pressed();
     void clear_button_press();
 
@@ -34,6 +36,8 @@ private:
     bool _button_pressed_flag = false;
 
     unsigned long _last_button_change = 0;
+
+    bool _value_changed_externally = false;
 
     int8_t _read_rotary();
     bool _button_reports_pressed();
